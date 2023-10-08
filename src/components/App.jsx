@@ -59,11 +59,17 @@ export class App extends Component {
     }
   };
 
+  componentDidUpdate(_, prevState) {
+    if (prevState.query !== this.state.query) {
+      this.fetchAllImages();
+    }
+  }
+
   render() {
     return (
       <div>
         <Searchbar onSubmit={this.handleSubmit} />
-        {this.state.query ?? (
+        {this.state.query && (
           <>
             <ImageGallery images={this.state.images} />
             {/* <Button /> */}
