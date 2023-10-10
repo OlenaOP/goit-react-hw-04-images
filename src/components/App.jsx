@@ -15,7 +15,7 @@ import { Button } from './Button/Button';
 
 export class App extends Component {
   state = {
-    query: null,
+    query: '',
     images: [],
     page: 1,
     isModalOpen: false,
@@ -57,9 +57,7 @@ export class App extends Component {
   };
 
   componentDidMount = () => {
-    {
-      this.state.query ?? this.fetchAllImages();
-    }
+    this.state.query ?? this.fetchAllImages();
   };
 
   componentDidUpdate(_, prevState) {
@@ -75,6 +73,7 @@ export class App extends Component {
     return (
       <div>
         <Searchbar onSubmit={this.handleSubmit} />
+        {this.state.isLoading && <p>Loading...</p>}
         {this.state.query && (
           <>
             <ImageGallery images={this.state.images} />
