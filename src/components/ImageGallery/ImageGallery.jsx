@@ -1,17 +1,22 @@
 import { ImageGalleryItem } from '../ImageGalleryItem/ImageGalleryItem';
 import css from './ImageGallery.module.css';
 
-export const ImageGallery = ({ images }) => {
-  console.log(images);
+export const ImageGallery = ({ images, onImageClick }) => {
+  if (images.length === 0) {
+    return;
+  }
+
   return (
     <ul className={css.ImageGallery}>
       {images.map(img => {
         return (
           <ImageGalleryItem
             key={img.id}
-            id={img.id}
-            webformatURL={img.webformatURL}
-            alt={img.tags}
+            image={img}
+            // id={img.id}
+            // webformatURL={img.webformatURL}
+            // alt={img.tags}
+            onClick={onImageClick}
           />
         );
         // return (
