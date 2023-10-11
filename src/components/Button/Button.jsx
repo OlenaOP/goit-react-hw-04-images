@@ -1,7 +1,15 @@
-export const Button = handleClick => {
+import css from './Button.module.css';
+
+export const Button = ({ handleClick }) => {
   return (
-    <button type="button" onClick={handleClick}>
-      Load more..
-    </button>
+    <div>
+      <button
+        type="button"
+        onClick={handleClick}
+        className={css.ButtonLoadMore}
+      >
+        Load more..
+      </button>
+    </div>
   );
 };
