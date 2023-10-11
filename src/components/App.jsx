@@ -42,7 +42,7 @@ export class App extends Component {
     }
   };
 
-  ClickHandler = () => {
+  ClickHandler = event => {
     this.setState(prevState => {
       return { page: prevState.page + 1 };
     });
