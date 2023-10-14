@@ -29,10 +29,17 @@ export class App extends Component {
       // console.log('images=', this.state.images);
       // console.log('concat arr', this.state.images.concat(images.hits));
       this.setState(prevState => {
-        return {
-          images: prevState.images.concat(images.hits),
-          loadMore: this.state.page < this.state.totalPages,
-        };
+        if (this.state.page === 1) {
+          return {
+            images: images.hits,
+            loadMore: this.state.page < this.state.totalPages,
+          };
+        } else {
+          return {
+            images: prevState.images.concat(images.hits),
+            loadMore: this.state.page < this.state.totalPages,
+          };
+        }
       });
     } catch (error) {
       this.setState({ error: error.message });
@@ -62,7 +69,7 @@ export class App extends Component {
     }
   };
 
-  ClickHandler = () => {
+  ClickHandlerLoadMore = () => {
     this.setState(prevState => {
       return {
         page: prevState.page + 1,
@@ -75,8 +82,8 @@ export class App extends Component {
     const form = evt.currentTarget;
     const search = form.elements.search.value;
     console.log(search);
-    this.setState({ query: search, page: 1, images: [] });
     this.totalPageCount();
+    this.setState({ query: search, page: 1 });
   };
 
   openModal = selectedImage => {
@@ -100,10 +107,10 @@ export class App extends Component {
     }
   }
 
-  handleImageClick = image => {
-    this.setState({ activeImage: image, showModal: true });
-    document.body.style.overflow = 'hidden';
-  };
+  // handleImageClick = image => {
+  //   this.setState({ activeImage: image, showModal: true });
+  //   document.body.style.overflow = 'hidden';
+  // };
 
   render() {
     return (
@@ -117,7 +124,7 @@ export class App extends Component {
               onImageClick={this.openModal}
             />
             {this.state.loadMore ? (
-              <Button handleClick={this.ClickHandler} />
+              <Button handleClick={this.ClickHandlerLoadMore} />
             ) : (
               <></>
             )}
