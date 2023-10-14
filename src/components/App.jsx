@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Searchbar } from './Searchbar/Searchbar';
 import { ImageGallery } from './ImageGallery/ImageGallery';
 import { Modal } from './Modal/Modal';
-import { fetchAllImagesByQuery, fetchImages } from '../services/api.js';
+import { fetchImages } from '../services/api.js';
 import { Button } from './Button/Button';
 import { Loader } from './Loader/Loader';
 
@@ -14,7 +14,7 @@ export class App extends Component {
     isModalOpen: false,
     isLoading: false,
     error: null,
-    loadMore: true,
+    loadMore: false,
     totalPages: 1,
     activeImage: null,
   };
@@ -24,49 +24,30 @@ export class App extends Component {
       this.setState({
         isLoading: true,
       });
+      if (!this.state.query) {
+        return;
+      }
+
       const images = await fetchImages(this.state.query, this.state.page);
-      // console.log('images.hits=', images.hits);
-      // console.log('images=', this.state.images);
+      const pagesCount = Math.ceil(images.totalHits / 12);
+      this.setState({ totalPages: pagesCount });
+
+      // console.log('totalPages=', this.state.totalPages);
+      // console.log('Page=', this.state.page);
       // console.log('concat arr', this.state.images.concat(images.hits));
       this.setState(prevState => {
         if (this.state.page === 1) {
           return {
             images: images.hits,
-            loadMore: this.state.page < this.state.totalPages,
+            loadMore: this.state.page < pagesCount,
           };
         } else {
           return {
             images: prevState.images.concat(images.hits),
-            loadMore: this.state.page < this.state.totalPages,
+            loadMore: this.state.page < pagesCount,
           };
         }
       });
-    } catch (error) {
-      this.setState({ error: error.message });
-    } finally {
-      this.setState({
-        isLoading: false,
-      });
-    }
-  };
-
-  totalPageCount = async () => {
-    try {
-      this.setState({
-        isLoading: true,
-      });
-      const images = await fetchAllImagesByQuery(this.state.query);
-      const pagesCount = Math.ceil(images.totalHits / 12);
-      // console.log('images.hits=', images.hits);
-      // console.log('images=', this.state.images);
-      // console.log('concat arr', this.state.images.concat(images.hits));
-      this.setState({ totalPages: pagesCount });
-      console.log(
-        'totalPages:',
-        this.state.totalPages,
-        Math.ceil(images.totalHits / 12)
-      );
-      console.log('totalHits:', images.totalHits);
     } catch (error) {
       this.setState({ error: error.message });
     } finally {
@@ -89,7 +70,7 @@ export class App extends Component {
     const form = evt.currentTarget;
     const search = form.elements.search.value;
     console.log(search);
-    this.totalPageCount();
+
     this.setState({ query: search, page: 1 });
   };
 
@@ -113,11 +94,6 @@ export class App extends Component {
       this.fetchAllImages();
     }
   }
-
-  // handleImageClick = image => {
-  //   this.setState({ activeImage: image, showModal: true });
-  //   document.body.style.overflow = 'hidden';
-  // };
 
   render() {
     return (
