@@ -56,10 +56,17 @@ export class App extends Component {
         isLoading: true,
       });
       const images = await fetchAllImagesByQuery(this.state.query);
+      const pagesCount = Math.ceil(images.totalHits / 12);
       // console.log('images.hits=', images.hits);
       // console.log('images=', this.state.images);
       // console.log('concat arr', this.state.images.concat(images.hits));
-      this.setState({ totalPages: Math.ceil(images.totalHits / 12) });
+      this.setState({ totalPages: pagesCount });
+      console.log(
+        'totalPages:',
+        this.state.totalPages,
+        Math.ceil(images.totalHits / 12)
+      );
+      console.log('totalHits:', images.totalHits);
     } catch (error) {
       this.setState({ error: error.message });
     } finally {
