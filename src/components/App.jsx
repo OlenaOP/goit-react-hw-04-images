@@ -1,4 +1,6 @@
-import React, { Component } from 'react';
+import React from 'react';
+import { useState, useEffect } from 'react';
+
 import { Searchbar } from './Searchbar/Searchbar';
 import { ImageGallery } from './ImageGallery/ImageGallery';
 import { Modal } from './Modal/Modal';
@@ -6,120 +8,116 @@ import { fetchImages } from '../services/api.js';
 import { Button } from './Button/Button';
 import { Loader } from './Loader/Loader';
 
-export class App extends Component {
-  state = {
-    query: '',
-    images: [],
-    page: 1,
-    isModalOpen: false,
-    isLoading: false,
-    error: null,
-    loadMore: false,
-    totalPages: 1,
-    activeImage: null,
-  };
+export const App = () => {
+  // state = {
+  //   query: '',
+  //   images: [],
+  //   page: 1,
+  //   isModalOpen: false,
+  //   isLoading: false,
+  //   error: null,
+  //   loadMore: false,
+  //   totalPages: 1,
+  //   activeImage: null,
+  // };
+  const [query, setQuery] = useState('');
+  const [images, setImages] = useState([]);
+  const [page, setPage] = useState(1);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [loadMore, setLoadMore] = useState(false);
+  const [totalPages, setTotalPages] = useState(1);
+  const [activeImage, setActiveImage] = useState(null);
 
-  fetchAllImages = async () => {
+  const fetchAllImages = async () => {
     try {
-      this.setState({
-        isLoading: true,
-      });
-      if (!this.state.query) {
+      setIsLoading(true);
+      if (query === '') {
         return;
       }
 
-      const images = await fetchImages(this.state.query, this.state.page);
-      const pagesCount = Math.ceil(images.totalHits / 12);
-      this.setState({ totalPages: pagesCount });
+      const allImages = await fetchImages(query, page);
+      if (allImages.hits.length === 0) {
+        // images not found
+        return alert('Sorry image not found...');
+      }
+      const pagesCount = Math.ceil(allImages.totalHits / 12);
+      setTotalPages(pagesCount);
 
       // console.log('totalPages=', this.state.totalPages);
       // console.log('Page=', this.state.page);
       // console.log('concat arr', this.state.images.concat(images.hits));
-      this.setState(prevState => {
-        if (this.state.page === 1) {
-          return {
-            images: images.hits,
-            loadMore: this.state.page < pagesCount,
-          };
-        } else {
-          return {
-            images: prevState.images.concat(images.hits),
-            loadMore: this.state.page < pagesCount,
-          };
-        }
-      });
+      if (page === 1) {
+        setImages(allImages.hits);
+        setLoadMore(page < pagesCount);
+      } else {
+        setImages(prevState => [...prevState, ...allImages.hits]);
+        setLoadMore(page < pagesCount);
+      }
     } catch (error) {
-      this.setState({ error: error.message });
+      setError(error.message);
     } finally {
-      this.setState({
-        isLoading: false,
-      });
+      setIsLoading(false);
     }
   };
 
-  ClickHandlerLoadMore = () => {
-    this.setState(prevState => {
-      return {
-        page: prevState.page + 1,
-      };
-    });
+  const ClickHandlerLoadMore = () => {
+    setPage(prevState => prevState + 1);
   };
 
-  handleSubmit = evt => {
+  const handleSubmit = evt => {
     evt.preventDefault();
     const form = evt.currentTarget;
     const search = form.elements.search.value;
     console.log(search);
 
-    this.setState({ query: search, page: 1 });
+    setQuery(search);
+    setPage(1);
   };
 
-  openModal = selectedImage => {
-    this.setState({ activeImage: selectedImage, isModalOpen: true });
+  const openModal = selectedImage => {
+    setActiveImage(selectedImage);
+    setIsModalOpen(true);
   };
 
-  closeModal = () => {
-    this.setState({ activeImage: null, isModalOpen: false });
+  const closeModal = () => {
+    setActiveImage(null);
+    setIsModalOpen(false);
   };
 
-  componentDidMount = () => {
-    this.state.query ?? this.fetchAllImages();
-  };
+  // componentDidMount = () => {
+  //   this.state.query ?? this.fetchAllImages();
+  // };
 
-  componentDidUpdate(_, prevState) {
-    if (
-      this.state.page !== prevState.page ||
-      this.state.query !== prevState.query
-    ) {
-      this.fetchAllImages();
-    }
-  }
+  // componentDidUpdate(_, prevState) {
+  //   if (
+  //     this.state.page !== prevState.page ||
+  //     this.state.query !== prevState.query
+  //   ) {
+  //     this.fetchAllImages();
+  //   }
+  // }
+  useEffect(() => {
+    query ?? fetchAllImages();
+  }, []);
 
-  render() {
-    return (
-      <div>
-        <Searchbar onSubmit={this.handleSubmit} />
-        {this.state.isLoading && <Loader />}
-        {this.state.query && (
-          <>
-            <ImageGallery
-              images={this.state.images}
-              onImageClick={this.openModal}
-            />
-            {this.state.loadMore ? (
-              <Button handleClick={this.ClickHandlerLoadMore} />
-            ) : (
-              <></>
-            )}
-          </>
-        )}
-        {this.state.isModalOpen && (
-          <Modal
-            image={this.state.activeImage}
-            onCloseModal={this.closeModal}
-          />
-        )}
-      </div>
-    );
-  }
-}
+  useEffect(() => {
+    console.log('изменился page or query');
+    fetchAllImages();
+  }, [page, query]);
+
+  return (
+    <div>
+      <Searchbar onSubmit={handleSubmit} />
+      {isLoading && <Loader />}
+      {query !== '' && (
+        <>
+          <ImageGallery images={images} onImageClick={openModal} />
+          {loadMore ? <Button handleClick={ClickHandlerLoadMore} /> : <></>}
+        </>
+      )}
+      {isModalOpen && <Modal image={activeImage} onCloseModal={closeModal} />}
+    </div>
+  );
+};
