@@ -2,16 +2,7 @@ import css from './Modal.module.css';
 import React from 'react';
 import { useEffect } from 'react';
 
-// import { Overlay, ModalDiv } from './styledComponents/Modal';
-
 export const Modal = ({ image, onCloseModal }) => {
-  // componentDidMount() {
-  //   window.addEventListener('keydown', this.handleKeyDown);
-  // }
-
-  // componentWillUnmount() {
-  //   window.removeEventListener('keydown', this.handleKeyDown);
-  // }
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
     return () => {

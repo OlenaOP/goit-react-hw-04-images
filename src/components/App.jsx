@@ -9,17 +9,6 @@ import { Button } from './Button/Button';
 import { Loader } from './Loader/Loader';
 
 export const App = () => {
-  // state = {
-  //   query: '',
-  //   images: [],
-  //   page: 1,
-  //   isModalOpen: false,
-  //   isLoading: false,
-  //   error: null,
-  //   loadMore: false,
-  //   totalPages: 1,
-  //   activeImage: null,
-  // };
   const [query, setQuery] = useState('');
   const [images, setImages] = useState([]);
   const [page, setPage] = useState(1);
@@ -40,14 +29,11 @@ export const App = () => {
       const allImages = await fetchImages(query, page);
       if (allImages.hits.length === 0) {
         // images not found
-        return alert('Sorry image not found...');
+        return alert('Sorry images not found...');
       }
       const pagesCount = Math.ceil(allImages.totalHits / 12);
       setTotalPages(pagesCount);
 
-      // console.log('totalPages=', this.state.totalPages);
-      // console.log('Page=', this.state.page);
-      // console.log('concat arr', this.state.images.concat(images.hits));
       if (page === 1) {
         setImages(allImages.hits);
         setLoadMore(page < pagesCount);
@@ -86,24 +72,11 @@ export const App = () => {
     setIsModalOpen(false);
   };
 
-  // componentDidMount = () => {
-  //   this.state.query ?? this.fetchAllImages();
-  // };
-
-  // componentDidUpdate(_, prevState) {
-  //   if (
-  //     this.state.page !== prevState.page ||
-  //     this.state.query !== prevState.query
-  //   ) {
-  //     this.fetchAllImages();
-  //   }
-  // }
   useEffect(() => {
     query ?? fetchAllImages();
   }, []);
 
   useEffect(() => {
-    console.log('изменился page or query');
     fetchAllImages();
   }, [page, query]);
 
